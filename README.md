@@ -1,2 +1,0 @@
-# EnCoCanteenApp
-Enterprise Computing assessment

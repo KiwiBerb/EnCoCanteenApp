@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canteen Ordering App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .start-screen h1 {
+            color: white;
+            font-size: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            z-index: 1;
+            border: 3px solid white;
+            padding: 20px 40px;
+            border-radius: 10px;
+        }
+        .start-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                        url('https://www.aics.nsw.edu.au/wp-content/uploads/2015/11/Canteen-1024x683.jpg') center/cover;
+            text-align: center;
+        }
+
+        .start-button {
+            padding: 20px 40px;
+            font-size: 35px;
+            background-color: #ac2525;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 90%;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .start-button:hover {
+            background-color: #871010;
+        }
+
+        .menu-screen {
+            display: none;
+            padding: 20px;
+            padding-bottom: 0px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .menu-screen.active {
+            display: block;
+            padding-bottom: 120px;
+        }
+
+        .back-button {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+        position: relative;
+        height: 160px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        background-size: cover;
+        background-position: center;
+        overflow: hidden;
+        transition: transform 0.3s;
+        }
+        
+        .category-btn:hover {
+        transform: scale(1.03);
+        }
+        
+        .category-btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        }
+
+        .category-btn span {
+        position: relative;
+        z-index: 1;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+        }
+
+        .menu-items {
+            display: none;
+
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+
+            overflow-y: auto;
+
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+
+            z-index: 1000;
+        }
+        .menu-items.active {
+            display: block;
+        }
+        .menu-items h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .overlay {
+            display: none;
+
+            position: fixed;
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0,0,0,0.5);
+
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+            
+        .items {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .item {
+            display: flex;
+            flex-direction: column;
+
+            background: #fff;
+            border-radius: 12px;
+
+            overflow: visible;
+
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+
+            border: 1px solid #eee;
+
+            position: relative;
+            
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .item-content {
+            padding: 15px;
+        }
+
+        .quantity-popup {
+            display: none;
+            position: fixed;
+
+            top: 50%;
+            left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            width: 320px;
+            max-width: 90vw;
+
+            background: white;
+
+            padding: 30px;
+
+            border: 4px solid #ac2525;   /* NEW BORDER */
+            border-radius: 18px;
+
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+
+            z-index: 9999;
+
+            text-align: center;
+        }
+
+        .quantity-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .quantity-text {
+            margin-bottom: 12px;
+            font-weight: bold;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .item-price {
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 0 15px;
+        }
+
+        .item-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .add-btn {
+            padding: 5px 15px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .add-btn:hover {
+            background-color: #0b7dda;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .popup-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .popup-btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .confirm-btn {
+            background-color: #4CAF50;
+        }
+
+        .confirm-btn:hover {
+            background-color: #45a049;
+        }
+
+        .cancel-btn {
+            background-color: #d9534f;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c9302c;
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+
+            border: none;
+            border-radius: 50%;
+
+            background-color: #2196F3;
+            color: white;
+
+            font-size: 20px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .qty-btn:hover {
+            background-color: #0b7dda;
+            transform: scale(1.1);
+        }
+
+        .qty-number {
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+
+            background-color: white;
+            border-top: 3px solid #ac2525;
+
+            padding: 15px 20px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            
+            z-index: 100;;
+        }
+        .cart-total {
+            background-color: #ac2525;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .checkout-actions {
+            display: none;
+            gap: 15px;
+        }
+
+        
+/* Bounce animation */
+        @keyframes bounce {
+            0% {
+                transform: scale(1);
+            }
+
+            25% {
+                transform: scale(1.25);
+            }
+
+            50% {
+                transform: scale(0.95);
+            }
+
+            70% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        } 
+
+        .cart-total.bounce {
+            animation: bounce 0.4s;
+        }
+
+        .cart-total.active {
+            display: block;
+        }
+        
+        .cart-indicator {
+            background-color: #ac2525;
+            color: white;
+
+            padding: 12px 18px;
+            border-radius: 50px;
+
+            font-size: 20px;
+            font-weight: bold;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            margin-left: 15px;
+
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+
+            transition: transform 0.2s;
+        }
+
+        .cart-indicator.bump {
+            transform: scale(1.15);
+        }
+
+        .checkout-screen {
+            display: none;
+            margin-top: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .checkout-screen.active {
+            display: block;
+        }
+        
+        .checkout-screen h2 {
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .remove-btn {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .remove-btn:hover {
+            background-color: #c9302c;
+        }
+
+        .checkout-total {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .checkout-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+
+        .checkout-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .checkout-actions button {
+            padding: 18px 40px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 240px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        .checkout-actions button:hover {
+            transform: scale(1.05);
+            opacity: 0.95;
+        }
+
+        .keep-ordering-btn {
+            background-color: #2196F3;
+        }
+        .keep-ordering-btn:hover {
+            background-color: #0b7dda;
+        }
+        .confirm-order-btn {
+            background-color: #4CAF50;
+        }
+        .confirm-order-btn:hover {
+            background-color: #45a049;
+        }
+        .payment-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+
+            justify-content: center;
+            align-items: center;
+
+            z-index: 10000;
+        }
+
+        #inactivePopup {
+            z-index: 10001;
+        }
+
+        .payment-box {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            width: 350px;
+
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .payment-box h2 {
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .payment-btn {
+            width: 100%;
+            padding: 18px;
+            margin: 10px 0;
+
+            border: none;
+            border-radius: 8px;
+
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+        }
+
+        .card-btn {
+            background-color: #2196F3;
+        }
+
+        .card-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        .counter-btn {
+            background-color: #4CAF50;
+        }
+
+        .counter-btn:hover {
+            background-color: #45a049;
+        }
+
+        .popup-back-btn {
+            background-color: #333;
+            color: white;
+
+            border: none;
+            border-radius: 6px;
+
+            padding: 10px 18px;
+            margin-bottom: 20px;
+
+            cursor: pointer;
+            font-size: 16px;
+
+            transition: background-color 0.3s;
+        }
+
+        .popup-back-btn:hover {
+            background-color: #111;
+        }
+
+        .empty-cart-box {
+            background-color: white;
+            padding: 35px;
+            border-radius: 12px;
+            text-align: center;
+            width: 350px;
+
+            border: 3px solid #d9534f;
+
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .empty-cart-box h2 {
+            color: #d9534f;
+            margin-bottom: 15px;
+        }
+
+        .empty-cart-box p {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .empty-cart-btn {
+            background-color: #2196F3;
+            color: white;
+
+            border: none;
+            border-radius: 8px;
+
+            padding: 12px 25px;
+
+            font-size: 18px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+        }
+
+        .empty-cart-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        .searchContainer {
+            width: 100%;
+            padding: 15px 20px;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        #searchBar {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 18px;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+            outline: none;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+
+        #searchBar:focus {
+            border-color: #4CAF50;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <h1>Canteen Ordering System</h1>
+        <button class="start-button" onclick="startOrdering()">Press to start ordering</button>
+    </div>
+
+    <div class="menu-screen" id="menuScreen">
+        <button class="back-button" onclick="backToStart()">← Back</button>
+    
+        <div class="bottom-bar">
+            <!-- Normal menu buttons -->
+            <div id="menuButtons" style="display: flex; align-items: center;">
+                
+                <button class="checkout-btn" onclick="showCheckout()">
+                    Checkout
+                </button>
+                
+                <div class="cart-total" id="cartTotal">
+                    Total: $0.00
+                </div>
+            
+            <div class="cart-indicator">
+                🛒 <span id="cartCount">0</span>
+            </div>
+
+        </div>
+
+            <!-- Checkout page buttons -->
+            <div class="checkout-actions" id="checkoutActions">
+
+                <button class="keep-ordering-btn" onclick="keepOrdering()">
+                    Keep Ordering
+                </button>
+
+                <button class="confirm-order-btn" onclick="confirmOrder()">
+                    Confirm Order
+                </button>
+
+            </div> <!-- closes checkoutActions -->
+        </div> <!-- closes bottom-bar -->
+
+        <div class="searchContainer" id="searchContainer">
+
+            <input 
+                type="text"
+                id="searchBar"
+                placeholder="Search for food or drinks..."
+                onkeyup="searchItems()"
+            >
+
+        </div>
+
+        <div class="categories" id="categories"></div>
+        <div id="itemsContainer"></div>
+        
+        <div id="checkoutScreen" class="checkout-screen">    
+            <h2>Checkout</h2>
+
+            <div id="cartItems"></div>
+
+            <div class="checkout-total" id="checkoutTotal">
+                Total: $0.00
+            </div>
+        </div>
+    
+    </div> <!-- closes menuScreen -->
+
+    <script>
+        const menuData = {
+
+            breakfast: [
+                {   name: "Hashbrown", 
+                    price: 1.50,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXF88NlukMZl6FNpZxuijDssbyGVbfIqOu0g&s=400"
+                },
+                {   name: "Zaatar",  
+                    price: 4.00,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4ZI2JYF-ei8fKSjo7pQCYrFYSCMvHKSEL1g&s"
+                },
+                {   name: "Double Bacon Roll",
+                    price: 5.00,
+                    image: "https://www.recipetineats.com/tachyon/2015/02/DSC_0448.jpg?resize=500%2C375"
+                },
+                {   name: "Bacon Egg Roll",
+                    price: 5.00,
+                    image: "https://eightforestlane.com/wp-content/uploads/2024/07/Bacon-and-Egg-Rolls_SQ-1.jpg"
+                },
+                {   name: "Banana Bread",
+                    price: 4.80,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXuRPYbUjREpMvDKUpYX-sbBw1MUEXLn1xZQ&s"
+                }
+            ],
+            "salad bowls": [
+                {   name: "Fruit Salad (seasonal Fruit)", 
+                    price: 5.50,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB1scwkMofGIm8kOM_l8cdriB3C9IkZWM2AQ&s"
+                },
+                {   name: "Greek Salad (lettuce tomato cucumber onion feta olives)", 
+                    price: 6.50,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkmgVq2RxvqK7orfJnq4CkkL2-_58FZra7Ag&s"
+                },
+                {   name: "Mediterranean Pasta Salad (sundried tomatoes olive mushrooms pasta)", 
+                    price: 7.00,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoeMFyCF8ak-eCsC2_g5auIXVafb2LrA7CsQ&s&s"
+                },
+                {   name: "Pesto Salad (chicken bacon pesto cream)", 
+                    price: 7.00,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqkqutvyGhBOk1Tfq5uqnpNacoda9ViPtRHA&s"
+                },
+                {   name: "Chicken Cesar Salad (chicken mushrooms croutons bacon lettuce cheese)", 
+                    price: 7.00,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfRFeoNPqkEtWypXi2J9Y355hJQpk-1AxRBw&s"
+                }
+            ],
+            sandwiches: [
+                {   name: "Salad Sandwich (lettuce tomato cucumber carrot)", 
+                    price: 5.50,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBYkbyCSH-iglO4-IS_IeWrxjhykOdtkxJ4g&s"
+                },
+                {   name: "Cheese Salad Sandwich (cheese lettuce tomato cucumber carrot)", 
+                    price: 6.00,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUIM_DyIbD5VHzyio0fuFM-3rCdQwQNGjxMQ&s"
+                },
+                {   name: "Ham Cheese Tomato Sandwich (leg ham tasty cheese tomato mixed lettuce)", 
+                    price: 5.50,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtjEQid5Gqt3KKH0nB6Gq1QfdQxVkMHBfuPA&s"
+                },
+                {   name: "Chicken Salad Sandwich  (chicken lettuce tomato cucumber carrot)", 
+                    price: 6.00,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsq5ts493h7GVELGx0JVgooY-ghQES3cW3SA&s"
+                },
+                {   name: "Ham Cheese Salad Sandwich (ham cheese lettuce tomato cucumber carrot)", 
+                    price: 6.00,
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4mNtXiWdw-dOFVMNMtzSm3gBvINCtocVc9A&s"
+                }
+            ],
+            toasties: [
+                {   name: "Cheese Toastie", 
+                    price: 3.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgkUDkrGv8XuYNgzO9h1zwt7_5be8Q2Ih-IQ&s" 
+                },
+                {   name: "Ham Cheese Toastie",     
+                    price: 4.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT274wBfCjzyJMfL88B0cnEmb4DdnrivCEC1g&s" 
+                },
+                {   name: "Ham Cheese Tomato Toastie", 
+                    price: 4.50,    
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRP8B2CvaLcToUEXFanXYGfq_JOfjUerysCRQ&s" 
+                }
+            ],
+            sushi: [
+                {   name: "Sushi", 
+                    price: 4.50, 
+                    flavours: [
+                        "California",
+                        "Tuna",
+                        "Salmon",
+                        "Chicken",
+                        "Beef"
+                    ],
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRifnY42eeOuXzGKKvv6Qm27pZb_Kq_mWz42Q&s" 
+                },
+                {   name: "Rice Paper Rolls 2 pcs", 
+                    price: 7.50, 
+                    flavours: [
+                        "BBQ Chicken",
+                        "BBQ Pork",
+                        "Vegetarian"
+                    ],
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuG8B-MdlkpZgUA-9Izn4myS_RNHu_8RsQAQ&s" 
+                },
+                {   name: "Sashimi Salmon Nigiri Pack (4x salmon)", 
+                    price: 8.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxY7kdIrrGcXDWfOLU_h1GXFRJiR8spYXe8w&s" 
+                },
+                {   name: "Mixed Seafood Sushi & Nigiri (4x tuna, 4x salmon)", 
+                    price: 8.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbJu_A81hSjp73BYruMFyIyk_ZrDp_-03qOA&s" 
+                }
+            ],
+            wraps: [
+                {   name: "From the Garden (lettuce tomato cucumber carrot onion)", 
+                    price: 5.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_0Yq7ISwMM0qAiQ-hJYNLmBifMATIwD35lg&s" 
+                },
+                {   name: "Falafel (Falafel tomato lettuce cucumber humus)", 
+                    price: 6.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeJbTRqeU3RM1rFcti0xf3vQLM4FJaf4F6wQ&s" 
+                },
+                {   name: "Harvest Collection (ham cheese lettuce tomato cucumber onion)", 
+                    price: 6.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV9OsjD7-1GZtQz4lcLJ26FWcTimO-fh6_LQ&s" 
+                },
+                {   name: "Char Grilled Veg (egg plant capsicum mixed lettuce halloumi)", 
+                    price: 6.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxV5J8fINyT8E8DHLCjgTW08PO1-XCCRlVjA&s" 
+                },
+                {   name: "Chicken Farm (grilled chicken mixed lettuce sun dried tomatoes)", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREi0vKtdpA4ceU_2elgbNuLBwx97MiCPYOMQ&s" 
+                },
+                {   name: "Spicy Chicken Tender (chicken tenderloin lettuce dressing)", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfkKpct3lIMQnMB5jG1nd3D4p4Dzgx3YRANg&s" 
+                }
+            ],
+            milkshakes: [
+                {   name: "Chocolate Milkshake", 
+                    price: 4.00, 
+                    image: "https://iambaker.net/wp-content/uploads/2024/06/Chocolate-Shake-4.jpg" 
+                },
+                {   name: "Caramel Milkshake", 
+                    price: 4.00, 
+                    image: "https://cdn-productdbimages.barry-callebaut.com/sites/default/files/styles/web_gm_callebaut-detail/public/externals/ddb40be9909fb47f33a0a768c1c850bd.jpg?itok=U3LizhSm" 
+                },
+                {   name: "Strawberry Milkshake", 
+                    price: 4.00, 
+                    image: "https://cdn.bakedbree.com/uploads/2025/07/a-strawberry_milkshake-feature-1.jpeg" 
+                },
+                {   name: "Vanilla Milkshake", 
+                    price: 4.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlB3xfo8yZVAiN8vRO3erAMaj6jrpnk5685A&s" 
+                },
+                {   name: "Granola and Yoghurt Milkshake (Mixed Berries)", 
+                    price: 4.00, 
+                    image: "https://images.contentstack.io/v3/assets/blt9039451385f46c16/blt1dc3e3ce0f9d0096/635fd68777cccd12e6707ec7/SANI021_YoghurtBerrySmoothie_1408-HiRes.jpg" 
+                }
+            ],
+            pastas: [
+                {   name: "Lasagne", 
+                    price: 5.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsiWPwWiJrAoiPGDH4mS_4GnCjOSUbtUrMrA&s" 
+                },
+                {   name: "Gnocchi", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ42ob8NUqTfRj1MVp9HZA4l0j2gktGE0rE6w&s" 
+                },
+                {   name: "Spaghetti Boscaiola (pasta with creamy bacon and mushroom sauce)", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIztyvpS6wwDNvfLBUoIg24pDhJ3FRxkuORw&s" 
+                },
+                {   name: "Spaghetti Bolognese (ground beef garlic onion spices)", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScFhU4ICZV5PGLecgU3j9bP7a-ZpUpgj8WCg&s" 
+                }
+            ],
+            burgers: [
+            
+                {   name: "Classic BLT Burger(bacon cheese lettuce tomato bbq sauce)", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkyI8FiZESUyUSA_ZscWIhqNg-Rdy93FR5CQ&s"   
+                },
+                {   name: "Portugese Chicken Burger (spicy chicken bacon cheese lettuce mayo)", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLKMdC1JL7tPz7oWiS8RWhUXFhu1LlhGgVCw&s" 
+                },
+                {   name: "Chicken Supreme Burger(marinated chicken pineapple cheese lettuce)", 
+                    price: 7.00, 
+                    image: "https://img.taste.com.au/sduxEaTg/w720-h480-cfill-q80/taste/2017/03/33_hawaiian_chicken_burger-35-edit-125119-1.jpg" 
+                },
+                {   name: "Angus Beef Burger (lettuce tomato onion bbq sauce)", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSj5a3LH9o2t8-FOzEjkgibp1_TitlUuDXT4g&s" 
+                },
+                {   name: "Chicken Schnitzel Roll Burger (crumbled chicken lettuce dressing)", 
+                    price: 7.00, 
+                    image: "https://eightforestlane.com/wp-content/uploads/2025/10/Chicken-Schnitzel-Sandwich_WEB-12.jpg" 
+                }
+            ],
+            refreshments: [
+                {   name: "Plain Milk", 
+                    price: 2.00, 
+                    image: "https://assets3.thrillist.com/v1/image/1694700/1200x600/scale;;webp=auto;jpeg_quality=85.jpg" 
+                },    
+                {   name: "Water", 
+                    price: 2.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7VlAp0GFb-vVBZh6C7l8Z-I86G4gE74UfMA&s" 
+                },
+                {   name: "Orange Juice", 
+                    price: 4.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4RS8HJsC7_r4yml6thJOixL-4pyK1fFwkBQ&s" 
+                },
+                {   name: "Soft Drinks", 
+                    price: 2.80, 
+                    flavours: [
+                        "Coke",
+                        "Pepsi",
+                        "Sprite",
+                        "Fanta",
+                        "Solo"
+                    ],
+                    image: "https://www.tastingtable.com/img/gallery/13-popular-zero-sugar-sodas-ranked-worst-to-best/l-intro-1681141295.jpg" 
+                },
+                
+            ],
+            "rice combinations": [
+                {   name: "Fried Rice",  
+                    price: 5.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYQuweZySk0rKaBETG86y0tzwr9vfpftdKBQ&s" 
+                },
+                {   name: "Butter Chicken", 
+                    price: 7.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReT_rsrvh4738w-auhOt8j7qaLMbWLcTWUCw&s" 
+                },
+            ],
+            pies: [
+                {   name: "Beef Sausage Roll Pie", 
+                    price: 5.00, 
+                    image: "https://img.taste.com.au/ZbSnQZc1/taste/2016/11/beef-sausage-rolls-13020-1.jpeg" 
+                },
+                {   name: "Spinach & Feta Roll Pie", 
+                    price: 5.00, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkuDDZsn26EAwDbWUWhtNPhrgjaJAJSvZoTg&s" 
+                },
+                {   name: "Beef Pie", 
+                    price: 5.00, 
+                    image: "https://www.frugalandthriving.com.au/wp-content/uploads/2009/05/beef-pie-540x720.jpg" 
+                },
+            ],
+            "panini rolls": [
+                {   name: "BLT Panini Roll (bacon cheese lettuce tomato bbq sauce)", 
+                    price: 7.00, 
+                    image: "https://breaddad.com/wp-content/uploads/2024/09/BLT-panini-sandwich-21.jpg" 
+                },
+                {   name: "Spicy Chicken Panini Roll", 
+                    price: 7.00, 
+                    image: "https://homecookingmemories.com/wp-content/uploads/2014/04/Buffalo-Chicken-Panini-4.jpg" 
+                },
+                {   name: "Chicken Schnitzel Panini Roll (crumbed chicken cheese lettuce tomato mayo)", 
+                    price: 7.00, 
+                    image: "https://img.taste.com.au/lr7zcL5R/taste/2016/11/chicken-schnitzel-caesar-sandwich-98267-1.jpeg" 
+                },
+            ],
+            snacks: [
+                {   name: "Seasonal Fruit Cup", 
+                    price: 1.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3s1hmbRCGYr0dpP2KcWO0c0NaHga0IQSoaQ&s" 
+                },
+                {   name: "Popcorn",    
+                    price: 2.50, 
+                    image: "https://joyfoodsunshine.com/wp-content/uploads/2023/04/homemade-butter-popcorn-recipe-1-500x500.jpg" 
+                },
+                {   name: "Red Rock Chips",     
+                    price: 2.80, 
+                    flavours: [
+                        "Sweet Chilli & Sour Cream",
+                        "Honey Soy Chicken",
+                        "Lime & Black Pepper",
+                        "Sea Salt",
+                        "Sea Salt & Balsamic Vinegar"
+                    ],
+                    image: "https://www.redrockdeli.com.au/prod/s3fs-public/2022-06/10generousupdatedimage_0.png" 
+                },
+                {   name: "Garlic Bread", 
+                    price: 2.50, 
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTXPxyKHrY5nsgmdFRuGHpZhJuvZI1vvhAmg&s" 
+                },
+                {   name: "Muffins", 
+                    price: 5.00, 
+                    flavours: [
+                        "Blueberry",
+                        "Chocolate Chip",
+                        "Banana Nut",
+                        "Apple Cinnamon",
+                        "Lemon Poppy Seed",
+                        "Pumpkin Spice"
+                    ],
+                    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPh_KeFHWtLtFQKlGTGHPNMsztcZTF-RDtDg&s" 
+                },
+            ],
+            "gluten free": [
+                {   name: "Potato Bake", 
+                    price: 6.50, 
+                    image: "https://www.onelovelylife.com/wp-content/uploads/2023/11/Scalloped-Potatoes12-4.jpg" 
+                },
+                {   name: "Chicken Tender Wrap", 
+                    price: 6.50, 
+                    image: "https://unboundwellness.com/wp-content/uploads/2023/07/snack_wrap_2.jpg" 
+                },
+            ],
+
+        };
+            //Images for each category
+            const categoryImages = {
+                breakfast: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=70",
+                "salad bowls": "https://images.unsplash.com/photo-1607532941433-304659e8198a?w=400&q=70",
+                sandwiches: "https://images.unsplash.com/photo-1553909489-cd47e0907980?w=400&q=70",
+                toasties: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=70",
+                sushi: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&q=70",
+                wraps: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=400&q=70",
+                milkshakes: "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?w=400&q=70",
+                pastas: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&q=70",
+                burgers: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=70",
+                refreshments: "https://images.unsplash.com/photo-1527960471264-932f39eb5846?w=400&q=70",
+                "rice combinations": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&q=70",
+                pies: "https://images.unsplash.com/photo-1608039783021-6116a558f0c5?w=400&q=70",
+                "panini rolls": "https://plus.unsplash.com/premium_photo-1700677186249-76a78b65ce5b?w=400&q=70",
+                snacks: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&q=70",
+                "gluten free": "https://images.unsplash.com/photo-1723910065922-67b84af65b23?w=400&q=70"
+            };
+
+        const MAX_STOCK = 10;
+        const INACTIVITY_TIME = 30000; //30 seconds
+        const itemLookup = {};
+
+        Object.values(menuData).forEach(category => {
+
+            category.forEach(item => {
+
+                const itemId =
+                    item.name.replace(/\s/g, '');
+
+                itemLookup[itemId] = item;
+
+            });
+
+        });
+
+        let cart = [];
+        let total = 0;
+        let inactivityTimer;
+        let countdownTimer;
+        let countdown = 10;
+        let currentOrderNumber = 1000;
+        let orderConfirmed = false;
+        let paymentProcessing = false;
+
+        const $ = id => document.getElementById(id);
+        
+        function show(id, display = 'block') {
+            const element = $(id);
+
+            if (!element) {
+                console.error(`Element not found: ${id}`);
+                return;
+            }
+
+            element.style.display = display;
+        }
+
+        function hide(id) {
+            const element = $(id);
+
+            if (!element) {
+                console.error(`Element not found: ${id}`);
+                return;
+            }
+
+            element.style.display = 'none';
+        }
+
+        function formatCategory(category) {
+            return category.charAt(0).toUpperCase() +
+                   category.slice(1);
+        }
+
+        function startOrdering() {
+        hide('startScreen');
+        document.getElementById('menuScreen')
+            .classList.add('active');
+        document.getElementById('cartTotal')
+            .classList.add('active');
+        displayCategories();
+        startInactivityTimer();
+        }
+
+        function backToStart() {
+
+            const checkoutScreen =
+                document.getElementById('checkoutScreen');
+
+            if (checkoutScreen.classList.contains('active')) {
+
+                checkoutScreen.classList.remove('active');
+
+                show('searchContainer');
+
+                show('categories', 'grid');
+                show('itemsContainer');
+
+                // FIXES BOTTOM BAR
+                show('menuButtons', 'flex');
+                hide('checkoutActions');
+
+            } else {
+
+                document.getElementById('startScreen').style.display = 'flex';
+                document.getElementById('menuScreen').classList.remove('active');
+
+            }
+        }
+
+        function displayCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+
+
+            Object.keys(menuData).forEach(category => {
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.style.backgroundImage =
+                    `url('${categoryImages[category]}')`;
+                btn.innerHTML =
+                    `<span>${formatCategory(category)}</span>`;
+
+                btn.onclick = () => displayItems(category);
+                container.appendChild(btn);
+            });
+        }
+
+        function createItemHTML(item) {
+
+            const itemId = item.name.replace(/\s/g, '');
+                
+            return `
+                <div class="item"
+                    onclick="toggleQuantity('${itemId}')">
+
+                    <img src="${item.image}"
+                        alt="${item.name}">
+
+                    <div class="item-content">
+
+                        <div class="item-name">
+                            ${item.name}
+                        </div>
+
+                        <div class="item-price">
+                            $${item.price.toFixed(2)}
+                        </div>
+
+                        <div class="quantity-popup"
+                            id="popup-${itemId}"
+                            onclick="event.stopPropagation()">
+
+                            ${item.flavours ? `
+                                <div style="margin-bottom:15px;">
+                                    <label style="
+                                        font-weight:bold;
+                                        display:block;
+                                        margin-bottom:8px;
+                                    ">
+                                        Choose a flavour:
+                                    </label>
+
+                                    <select id="flavour-${itemId}"
+                                        style="
+                                            width:100%;
+                                            padding:10px;
+                                            border-radius:6px;
+                                            border:1px solid #ccc;
+                                            font-size:16px;
+                                        ">
+                                        ${item.flavours.map(flavour => `
+                                            <option value="${flavour}">
+                                                ${flavour}
+                                            </option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                            ` : ''}
+
+                            <p class="quantity-text">
+                                How many items do you want to order?
+                            </p>
+
+                            <div class="quantity-controls">
+
+                                <button class="qty-btn"
+                                    onclick="event.stopPropagation(); changeQuantity(
+                                        '${item.name}',
+                                        ${item.price},
+                                        -1,
+                                        '${itemId}'
+                                    )">
+                                    -
+                                </button>
+
+                                <span class="qty-number"
+                                    id="qty-${itemId}">
+                                    1
+                                </span>
+
+                                <button class="qty-btn"
+                                    onclick="event.stopPropagation(); changeQuantity(
+                                        '${item.name}',
+                                        ${item.price},
+                                        1,
+                                        '${itemId}'
+                                    )">
+                                    +
+                                </button>
+
+                            </div>
+
+                            <div class="popup-actions">
+
+                                <button class="popup-btn confirm-btn"
+                                    onclick="event.stopPropagation(); confirmItem('${itemId}')">
+                                    Confirm
+                                </button>
+
+                                <button class="popup-btn cancel-btn"
+                                    onclick="event.stopPropagation(); cancelItem('${itemId}')">
+                                    Cancel
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+        }
+
+        function displayItems(category) {
+            const container = document.getElementById('itemsContainer');
+            const items = menuData[category];
+
+            let html = `
+                <div class="menu-items active">
+
+                    <button class="popup-back-btn" onclick="closeMenu()">
+                        ← Back
+                    </button>
+
+                    <h2>
+                        ${formatCategory(category)}
+                    </h2>
+
+                    <div class="items">
+            `;
+
+            if (items.length === 0) {
+                html += '<p>No items available</p>';
+            } else {
+                items.forEach(item => {
+                    html += createItemHTML(item);
+                });
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+
+            const overlay = $('overlay');
+            overlay.classList.add('active');
+        }
+
+        function toggleQuantity(itemId) {
+
+            const popup =
+                document.getElementById(`popup-${itemId}`);
+
+            const overlay =
+                $('overlay');
+
+            const allPopups =
+                document.querySelectorAll('.quantity-popup');
+
+            // Hide all other popups
+            allPopups.forEach(p => {
+                if (p !== popup) {
+                    p.style.display = 'none';
+                }
+            });
+
+            // Toggle current popup
+            if (popup.style.display === 'block') {
+
+                popup.style.display = 'none';
+                overlay.classList.remove('active');
+
+            } else {
+
+                popup.style.display = 'block';
+                popup.scrollIntoView({ block: 'center' });
+                overlay.classList.add('active');
+            }
+        }
+
+        function closeMenu() {
+            document.getElementById('itemsContainer').innerHTML = '';
+
+            const overlay = $('overlay');
+            overlay.classList.remove('active');
+        }
+
+        function closeSearchResults() {
+
+            document.getElementById('itemsContainer')
+                .innerHTML = '';
+
+            document.getElementById('searchBar')
+                .value = '';
+
+            $('overlay')
+                .classList.remove('active');
+        }
+
+        function addToCart(itemName, itemPrice) {
+            cart.push({
+                name: itemName,
+                price: itemPrice
+            });
+            total += itemPrice;
+            updateCart();
+        }
+        
+        function changeQuantity(itemName, itemPrice, change, itemId) {
+
+            const qtyElement =
+                document.getElementById(`qty-${itemId}`);
+
+            let quantity = parseInt(qtyElement.textContent);
+
+            quantity += change;
+
+            if (quantity < 1) {
+                quantity = 1;
+            }
+
+            qtyElement.textContent = quantity;
+        }
+
+        function updateCart() {
+
+            document.getElementById('cartTotal').textContent =
+                `Total: $${total.toFixed(2)}`;
+
+            document.getElementById('checkoutTotal').textContent =
+                `Total: $${total.toFixed(2)}`;
+
+            // Total quantity count
+            const totalItems =
+                cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            document.getElementById('cartCount').textContent =
+                totalItems;
+
+            const cartItemsContainer =
+                document.getElementById('cartItems');
+
+            let html = '';
+
+            if (cart.length === 0) {
+
+                html = '<p>Your cart is empty.</p>';
+
+            } else {
+
+                cart.forEach((item, index) => {
+
+                    const subtotal =
+                        item.price * item.quantity;
+
+                    html += `
+                        <div class="cart-item">
+
+                            <div>
+
+                                <div style="
+                                    font-weight:bold;
+                                    font-size:18px;
+                                    margin-bottom:5px;
+                                ">
+                                    ${item.name}
+                                </div>
+
+                                <div style="
+                                    color:#666;
+                                    margin-bottom:6px;
+                                ">
+                                    $${item.price.toFixed(2)} each
+                                </div>
+
+                                <div style="
+                                    font-weight:bold;
+                                    color:#4CAF50;
+                                ">
+                                    Subtotal:
+                                    $${subtotal.toFixed(2)}
+                                </div>
+
+                            </div>
+
+                            <div style="
+                                display:flex;
+                                align-items:center;
+                                gap:10px;
+                            ">
+
+                                <button class="qty-btn"
+                                    onclick="decreaseCartQuantity(${index})">
+                                    -
+                                </button>
+
+                                <span class="qty-number">
+                                    ${item.quantity}
+                                </span>
+
+                                <button class="qty-btn"
+                                    onclick="increaseCartQuantity(${index})">
+                                    +
+                                </button>
+
+                            </div>
+
+                        </div>
+                    `;
+                });
+            }
+
+            cartItemsContainer.innerHTML = html;
+
+            // Bounce animation
+            const cartTotal =
+                document.getElementById('cartTotal');
+
+            cartTotal.classList.remove('bounce');
+
+            void cartTotal.offsetWidth;
+
+            cartTotal.classList.add('bounce');
+        }
+
+        function removeItem(index) {
+
+            const item = cart[index];
+
+            if (item.quantity > 1) {
+
+                item.quantity--;
+
+                total -= item.price;
+
+            } else {
+
+                total -= item.price;
+
+                cart.splice(index, 1);
+            }
+
+            updateCart();
+        }
+
+        function increaseCartQuantity(index) {
+
+            const item = cart[index];
+
+            // STOCK LIMIT
+            if (item.quantity >= MAX_STOCK) {
+
+                showStockPopup(
+                    `Maximum quantity is ${MAX_STOCK}.`
+                );
+
+                return;
+            }
+
+            item.quantity++;
+
+            total += item.price;
+
+            updateCart();
+        }
+
+        function decreaseCartQuantity(index) {
+
+            const item = cart[index];
+
+            item.quantity--;
+
+            total -= item.price;
+
+            if (item.quantity <= 0) {
+
+                cart.splice(index, 1);
+            }
+
+            updateCart();
+        }
+
+        function showCheckout() {
+
+            hide('searchContainer'); // Hide search bar
+
+            hide('categories');
+            hide('itemsContainer');
+
+            $('checkoutScreen').classList.add('active');
+
+            hide('menuButtons');
+            show('checkoutActions', 'flex');
+
+            updateCart();
+        }
+
+        function keepOrdering() {
+
+            show('searchContainer'); // Show search bar again
+
+            show('categories', 'grid');
+            show('itemsContainer');
+
+            $('checkoutScreen').classList.remove('active');
+
+            show('menuButtons', 'flex');
+            hide('checkoutActions');
+        }
+
+        function confirmOrder() {
+
+            // Stop checkout if cart is empty
+            if (cart.length === 0) {
+
+                document.getElementById('emptyCartPopup').style.display = 'flex';
+
+                return;
+            }
+
+            $('overlay')
+                .classList.add('active');
+
+            show('paymentPopup', 'flex');
+            
+            // Reset payment popup content with back button
+            document.querySelector('.payment-box').innerHTML = `
+                <button class="popup-back-btn"
+                    onclick="backToCheckout()">
+                    ← Back
+                </button>
+
+                <h2>Select Payment Method</h2>
+
+                <button class="payment-btn card-btn"
+                    onclick="selectPayment('card')">
+                    Pay with Card
+                </button>
+
+                <button class="payment-btn counter-btn"
+                    onclick="selectPayment('counter')">
+                    Pay at Counter
+                </button>
+            `;
+        }
+
+        function backToCheckout() {
+
+            // Close payment popup
+            $('overlay')
+                .classList.remove('active');
+
+            document.getElementById('paymentPopup')
+                .style.display = 'none';
+
+            // Keep checkout screen visible
+            document.getElementById('checkoutScreen')
+                .classList.add('active');
+
+            // Keep checkout buttons visible
+            document.getElementById('menuButtons').style.display = 'none';
+            document.getElementById('checkoutActions').style.display = 'flex';
+        }
+
+        function selectPayment(method) {
+
+            const paymentBox = document.querySelector('.payment-box');
+
+            if (method === 'card') {
+
+                paymentBox.innerHTML = `
+                    <h2>Please Tap Card</h2>
+
+                    <img 
+                        src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png"
+                        alt="Card Scanner"
+                        style="
+                            width:120px;
+                            margin:20px 0;
+                        "
+                    >
+
+                    <p id="paymentStatus"
+                        style="
+                            font-size:18px;
+                            margin-bottom:25px;
+                        ">
+                        Waiting for card...
+                    </p>
+
+                    <button class="payment-btn cancel-btn"
+                        onclick="cancelPayment()">
+                        Cancel Payment
+                    </button>
+                `;
+
+                setTimeout(() => {
+
+                    const status =
+                        document.getElementById('paymentStatus');
+
+                    if (status) {
+                        status.textContent =
+                            "Cannot detect card, please try again.";
+                    }
+
+                }, 10000);
+
+            } else {
+                
+                paymentProcessing = true;
+
+                paymentBox.innerHTML = `
+                    <h2>Processing Order...</h2>
+
+                    <p style="
+                        font-size: 20px;
+                        margin: 30px 0;
+                        color: #333;
+                    ">
+                        Please wait...
+                    </p>
+                `;
+
+                // FETCH RUNS IMMEDIATELY
+                fetch("https://script.google.com/macros/s/AKfycbxbEKQbhd6_uA-QRcYwQQj32siLd51aTvHXGvpkWnW9f3XDlp1-_2LUXIAO5Yrgmqd1UQ/exec", {
+                    method: "POST",
+
+                    body: JSON.stringify({
+                        items: cart.map(item => ({
+                            name: item.name,
+                            quantity: item.quantity,
+                            price: item.price,
+                            subtotal: (item.price * item.quantity).toFixed(2)
+                        })),
+
+                        total: total.toFixed(2),
+                        paymentMethod: "Counter"
+                    })
+                })
+
+                .then(response => response.json())
+
+                .then(data => {
+
+                    paymentProcessing = false;
+                    orderConfirmed = true;
+
+                    console.log(data);
+
+                    currentOrderNumber = data.orderNumber;
+
+                    orderConfirmed = true;
+
+                    paymentBox.innerHTML = `
+                        <h2>Order Confirmed</h2>
+
+                        <p style="
+                            font-size:24px;
+                            font-weight:bold;
+                            margin:20px 0;
+                            color:#4CAF50;
+                        ">
+                            Order #${currentOrderNumber}
+                        </p>
+
+                        <p style="
+                            font-size:18px;
+                            line-height:1.5;
+                            margin-bottom:25px;
+                            color:#333;
+                        ">
+                            Please go to the counter and pay for your order
+                            for it to be prepared.
+                        </p>
+
+                            <button class="payment-btn counter-btn"
+                            onclick="resetSystem()">
+                            Done
+                        </button>
+                    `;
+                })
+
+                .catch(error => {
+
+                    paymentProcessing = false;
+
+                    console.error("FETCH ERROR:", error);
+
+                });
+            }
+        }
+
+        function cancelPayment() {
+
+            if (paymentProcessing) {
+                return;
+            }
+
+            if (orderConfirmed) {
+
+                resetSystem();
+                return;
+
+            }
+
+            $('overlay')
+                .classList.remove('active');
+
+            hide('paymentPopup');
+
+            // Restore original popup
+            document.querySelector('.payment-box').innerHTML = `
+                <button class="popup-back-btn"
+                    onclick="backToCheckout()">
+                    ← Back
+                </button>
+
+                <h2>Select Payment Method</h2>
+
+                <button class="payment-btn card-btn"
+                    onclick="selectPayment('card')">
+                    Card Payment
+                </button>
+
+                <button class="payment-btn counter-btn"
+                    onclick="selectPayment('counter')">
+                    Pay at Counter
+                </button>
+            `;
+        }
+
+        function closeAllPopups() {
+
+            document.querySelectorAll('.quantity-popup')
+                .forEach(popup => {
+                    popup.style.display = 'none';
+                });
+
+            $('overlay')
+                .classList.remove('active');
+        }
+
+        function confirmItem(itemId) {
+
+            let quantity =
+                parseInt(document.getElementById(`qty-${itemId}`).textContent);
+
+            if (quantity <= 0) {
+                return;
+            }
+
+            // STOCK LIMIT
+            if (quantity > MAX_STOCK) {
+
+                showStockPopup(
+                    `Maximum quantity is ${MAX_STOCK}.`
+                );
+
+                quantity = 10;
+            }
+
+            // Find item data
+            const selectedItem = itemLookup[itemId];
+
+            if (!selectedItem) return;
+
+            let finalName = selectedItem.name;
+
+            const flavourSelect =
+                document.getElementById(`flavour-${itemId}`);
+
+            if (flavourSelect) {
+
+                finalName =
+                    `${selectedItem.name} - ${flavourSelect.value}`;
+            }
+
+            // Check if item already exists in cart
+            const existingItem = cart.find(item => item.id === finalName);            
+            
+            if (existingItem) {
+
+                if (existingItem.quantity + quantity > MAX_STOCK) {
+                    showStockPopup(`Maximum quantity is ${MAX_STOCK}.`);
+                    return;
+                }
+
+                existingItem.quantity += quantity;
+
+            } else {
+
+                cart.push({
+                    id: finalName,
+                    name: finalName,
+                    price: selectedItem.price,
+                    quantity: quantity
+                });
+            }
+
+            // Update total
+            total += selectedItem.price * quantity;
+
+            updateCart();
+
+            // Reset popup quantity
+            document.getElementById(`qty-${itemId}`).textContent = 1;
+
+            // Close popup
+            document.getElementById(`popup-${itemId}`).style.display = 'none';
+        }
+
+        function cancelItem(itemId) {
+
+            document.getElementById(`qty-${itemId}`).textContent = 1;
+
+            document.getElementById(`popup-${itemId}`).style.display = 'none';
+        }
+
+        function startInactivityTimer() {
+
+            clearTimeout(inactivityTimer);
+
+            inactivityTimer = setTimeout(() => {
+
+                showInactivePopup();
+
+            }, INACTIVITY_TIME); // what ever time Inacitivy time is set to
+        }
+
+        function showInactivePopup() {
+
+             $('overlay').classList.add('active');
+
+            show('inactivePopup', 'flex');
+
+            countdown = 10;
+
+            document.getElementById('countdown').textContent = countdown;
+
+            countdownTimer = setInterval(() => {
+
+                countdown--;
+
+                document.getElementById('countdown').textContent = countdown;
+
+                if (countdown <= 0) {
+
+                    clearInterval(countdownTimer);
+
+                    resetSystem();
+                }
+
+            }, 1000);
+        }
+
+        function stayActive() {
+
+            hide('inactivePopup');
+
+            $('overlay').classList.remove('active');
+
+            clearInterval(countdownTimer);
+
+            startInactivityTimer();
+        }
+
+        function resetSystem() {
+
+            orderConfirmed = false;
+
+            clearTimeout(inactivityTimer);
+            clearInterval(countdownTimer);
+
+            document.getElementById('inactivePopup').style.display = 'none';
+
+            // Reset cart
+            cart = [];
+            total = 0;
+
+            updateCart();
+
+            // Reset quantity displays
+            document.querySelectorAll('.qty-number').forEach(qty => {
+                qty.textContent = 1;
+            });
+
+            // Close popups
+            closeMenu();
+            closeAllPopups();
+
+            // Hide payment popup
+            document.getElementById('paymentPopup').style.display = 'none';
+
+            // Hide inactivity popup
+            document.getElementById('inactivePopup').style.display = 'none';
+
+            // Hide empty cart popup
+            document.getElementById('emptyCartPopup').style.display = 'none';
+
+            // Remove overlay
+            $('overlay').classList.remove('active');
+
+            // Reset checkout screen
+            document.getElementById('checkoutScreen')
+                .classList.remove('active');
+
+            // Reset buttons
+            document.getElementById('menuButtons').style.display = 'flex';
+            document.getElementById('checkoutActions').style.display = 'none';
+
+            // Show categories again
+            document.getElementById('categories').style.display = 'grid';
+            document.getElementById('itemsContainer').style.display = 'block';
+
+            // Rebuild categories
+            displayCategories();
+            
+            // Hide menu
+            document.getElementById('menuScreen')
+                .classList.remove('active');
+
+            // Show start page
+            document.getElementById('startScreen')
+                .style.display = 'flex';
+
+            // Restore original payment popup
+            document.querySelector('.payment-box').innerHTML = `
+                <h2>Select Payment Method</h2>
+
+                <button class="payment-btn card-btn"
+                    onclick="selectPayment('card')">
+                    Pay with Card
+                </button>
+
+                <button class="payment-btn counter-btn"
+                    onclick="selectPayment('counter')">
+                    Pay at Counter
+                </button>
+            `;
+            show('searchContainer');
+        }
+        
+        // Detect user activity ONLY when ordering screen is open
+        ['click', 'mousemove', 'keypress', 'touchstart'].forEach(event => {
+
+            document.addEventListener(event, () => {
+
+                const menuScreen =
+                    document.getElementById('menuScreen');
+
+                if (menuScreen.classList.contains('active')) {
+                    startInactivityTimer();
+                }
+
+            });
+
+        });
+
+        function showStockPopup(message) {
+
+            document.getElementById('stockPopupText').textContent =
+                message;
+
+            show('stockPopup', 'flex');
+        }
+
+        function closeStockPopup() {
+
+            hide('stockPopup');
+        }
+
+        function searchItems() {
+
+            const search =
+                document.getElementById('searchBar')
+                .value
+                .toLowerCase();
+
+            const container =
+                document.getElementById('itemsContainer');
+
+            // If search is empty
+            if (search.trim() === "") {
+
+                container.innerHTML = "";
+
+                return;
+            }
+
+            let matchedItems = [];
+
+            // Search through all categories
+            Object.keys(menuData).forEach(category => {
+
+                menuData[category].forEach(item => {
+
+                    const itemName =
+                        item.name.toLowerCase();
+
+                    // Search item name
+                    if (itemName.includes(search)) {
+
+                        matchedItems.push(item);
+                    }
+
+                    // Search flavours
+                    if (item.flavours) {
+
+                        item.flavours.forEach(flavour => {
+
+                            if (
+                                flavour.toLowerCase()
+                                .includes(search)
+                            ) {
+
+                                matchedItems.push(item);
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Remove duplicates
+            matchedItems =
+                [...new Set(matchedItems)];
+
+            let html = `
+                <div class="menu-items active">
+
+                    <button class="popup-back-btn"
+                        onclick="closeSearchResults()">
+                        ← Back
+                    </button>
+
+                    <h2>Search Results</h2>
+
+                    <div class="items">
+            `;
+                        
+            if (matchedItems.length === 0) {
+
+                html += `
+                    <p>No matching items found.</p>
+                `;
+
+            } else {
+
+                matchedItems.forEach(item => {
+                    html += createItemHTML(item);
+                });
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            $('overlay')
+               .classList.add('active');
+        }
+
+    </script>
+    
+    <div id="paymentPopup"
+        class="payment-popup"
+        onclick="cancelPayment()">
+
+        <div class="payment-box"
+            onclick="event.stopPropagation()">
+
+            <h2>Select Payment Method</h2>
+
+            <button class="payment-btn card-btn"
+                onclick="selectPayment('card')">
+                Pay with Card
+            </button>
+
+            <button class="payment-btn counter-btn"
+                onclick="selectPayment('counter')">
+                Pay at Counter
+            </button>
+
+        </div>
+
+    </div>
+    
+    <div id="overlay"
+         class="overlay"
+         onclick="
+            closeAllPopups();
+            closeMenu();
+            closeSearchResults();
+            cancelPayment();
+         ">
+    </div>
+
+    <div id="inactivePopup" class="payment-popup">
+        <div class="payment-box">
+            <h2>Are you still ordering?</h2>
+
+            <p style="font-size:18px; margin:20px 0;">
+                Returning to start page in
+                <span id="countdown">10</span> seconds
+            </p>
+
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button class="payment-btn cancel-btn"
+                    style="width:140px;"
+                    onclick="resetSystem()">
+                    No
+                </button>
+
+                <button class="payment-btn counter-btn"
+                    style="width:140px;"
+                    onclick="stayActive()">
+                    Yes
+                </button>
+            </div>
+        </div>
+    </div>
+            
+    <div id="emptyCartPopup" class="payment-popup">
+
+        <div class="empty-cart-box">
+
+            <h2>Cart Empty</h2>
+
+            <p>
+                Your cart is empty.<br>
+                Please add items before confirming your order.
+            </p>
+
+            <button class="empty-cart-btn"
+                onclick="document.getElementById('emptyCartPopup').style.display='none'">
+                Okay
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="stockPopup" class="payment-popup">
+
+        <div class="empty-cart-box"
+            style="border:3px solid #ff9800;">
+
+            <h2 style="color:#ff9800;">
+                Stock Limit Reached
+            </h2>
+
+            <p id="stockPopupText">
+                Maximum quantity is 10.
+            </p>
+
+            <button class="empty-cart-btn"
+                onclick="closeStockPopup()">
+                Okay
+            </button>
+
+        </div>
+
+    </div>
+</body>  
+</html>
