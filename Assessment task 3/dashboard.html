@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body style="background-color: #d9d9d9;">
+
+    <div class="header-bar">
+        <button id="backBtn" onclick="window.location.href='index.html'">
+            ← Back
+        </button>
+
+        <h1 style="color: white;">Canteen Dashboard</h1>
+    </div>
+
+    <br>
+
+    <div class="charts-row" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        <div class="chart-container"> <!-- Total Revenue 1 -->
+            <iframe
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgEIp1bQGhdTDcq6tMtbqmzXfwxoPIsd9kmjrj3h9wJUfJiy2SGMf6OUsmo6GWClIE1cFX0ZPYcbT0/pubchart?oid=1811175995&format=interactive"
+                width="735"
+                height="128"
+                frameborder="0">
+            </iframe>
+        </div>
+
+        <div class="chart-container"> <!-- Number of Orders -->
+            <iframe
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgEIp1bQGhdTDcq6tMtbqmzXfwxoPIsd9kmjrj3h9wJUfJiy2SGMf6OUsmo6GWClIE1cFX0ZPYcbT0/pubchart?oid=1245495162&format=interactive"
+                width="380"
+                height="128"
+                frameborder="0">
+            </iframe>
+        </div>
+
+
+        
+        <div class="chart-container"> <!-- Peak order time -->
+            <iframe
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgEIp1bQGhdTDcq6tMtbqmzXfwxoPIsd9kmjrj3h9wJUfJiy2SGMf6OUsmo6GWClIE1cFX0ZPYcbT0/pubchart?oid=327242639&format=interactive"
+                width="411"
+                height="137"
+                frameborder="0">
+            </iframe>
+        </div>
+
+        <div class="chart-container"> <!-- Revenue and time 4 -->
+            <iframe
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgEIp1bQGhdTDcq6tMtbqmzXfwxoPIsd9kmjrj3h9wJUfJiy2SGMf6OUsmo6GWClIE1cFX0ZPYcbT0/pubchart?oid=2094584880&format=interactive"
+                width="411"
+                height="137"
+                frameborder="0">
+            </iframe>
+        </div>
+
+        <div class="chart-container"> <!-- Number of orders per day -->
+            <iframe
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgEIp1bQGhdTDcq6tMtbqmzXfwxoPIsd9kmjrj3h9wJUfJiy2SGMf6OUsmo6GWClIE1cFX0ZPYcbT0/pubchart?oid=602622181&format=interactive"
+                width="273"
+                height="137"
+                frameborder="0">
+            </iframe>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="charts-row" style="display:flex; gap:20px; justify-content:center;">
+        <div class="chart-container"> <!-- Number of individual items bought -->
+            <iframe
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgEIp1bQGhdTDcq6tMtbqmzXfwxoPIsd9kmjrj3h9wJUfJiy2SGMf6OUsmo6GWClIE1cFX0ZPYcbT0/pubchart?oid=809446732&format=interactive"
+                width="676"
+                height="413"
+                frameborder="0">
+            </iframe>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            <div class="chart-container"> <!-- Number of individual items bought (count) -->
+                <iframe
+                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgEIp1bQGhdTDcq6tMtbqmzXfwxoPIsd9kmjrj3h9wJUfJiy2SGMf6OUsmo6GWClIE1cFX0ZPYcbT0/pubchart?oid=975685300&format=interactive"
+                    width="462"
+                    height="87"
+                    frameborder="0">
+                </iframe>
+            </div>
+
+            <div class="chart-container"> <!-- % of items bought -->
+                <iframe
+                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgEIp1bQGhdTDcq6tMtbqmzXfwxoPIsd9kmjrj3h9wJUfJiy2SGMf6OUsmo6GWClIE1cFX0ZPYcbT0/pubchart?oid=2024397235&format=interactive"
+                    width="477"
+                    height="286"
+                    frameborder="0">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
